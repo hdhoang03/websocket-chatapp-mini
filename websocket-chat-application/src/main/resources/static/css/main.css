@@ -284,4 +284,22 @@ button.accent {
     .chat-header h2 {
         font-size: 1.1em;
     }
+
+    .private-message {
+        background-color: #eaf5ff; /* Màu nền xanh nhạt */
+        border-left: 4px solid #3498db; /* Viền trái màu xanh dương */
+    }
+
+    .private-message i {
+        background-color: #3498db !important; /* Màu nền avatar */
+    }
+
+    .private-message span {
+        color: #1a5276; /* Màu chữ cho người gửi */
+    }
+
+    .private-message p {
+        font-style: italic; /* Làm nghiêng nội dung tin nhắn */
+        color: #2c3e50; /* Màu chữ đậm hơn một chút */
+    }
 }

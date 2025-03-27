@@ -17,89 +17,112 @@ var colors = [
 ];
 
 function connect(event) {
-	 username = document.querySelector('#name').value.trim();
+    username = document.querySelector('#name').value.trim();
 
-	 if (username) {
-	 	usernamePage.classList.add('hidden');
-	 	chatPage.classList.remove('hidden');
+    if (username) {
+        usernamePage.classList.add('hidden');
+        chatPage.classList.remove('hidden');
 
-	 	var socket = new SockJS('/ws');
-	 	stompClient = Stomp.over(socket);
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
 
-	 	stompClient.connect({}, onConnected, onError);
-	 }
+        stompClient.connect({}, onConnected, onError);
+    }
 
-	  event.preventDefault();
+    event.preventDefault();
 }
 
 function onConnected() {
-	 stompClient.subscribe('/topic/chat', onMessageReceived);
-
-     stompClient.send("/app/chat.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}))
-
-     connectingElement.classList.add('hidden');
+    stompClient.subscribe('/user/' + username + '/private', onPrivateMessageReceived); // Nhắn riêng
+    stompClient.subscribe('/topic/chat', onMessageReceived); // Nhắn chung
+    stompClient.send("/app/chat.addUser", {}, JSON.stringify({ sender: username, type: 'JOIN' }));
+    connectingElement.classList.add('hidden');
+    console.log("Subscribed to /user/" + username + "/private"); // Debug
 }
 
 function onError(error) {
-	connectingElement.textContent = 'Not able to connect. Please try again';
-	connectingElement.style.color = 'red';
+    connectingElement.textContent = 'Không thể kết nối. Vui lòng thử lại!';
+    connectingElement.style.color = 'red';
 }
 
-
 function sendMessage(event) {
-	 var messageContent = messageInput.value.trim();
+    var messageContent = messageInput.value.trim();
+    var receiverInput = document.querySelector("#receiver").value.trim();
 
-	 if (messageContent && stompClient) {
-	 	var chatMessage = {
+    if (messageContent && stompClient) {
+        var chatMessage = {
             sender: username,
-            content: messageInput.value,
+            content: messageContent,
             type: 'CHAT'
         };
 
-       stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-       messageInput.value = '';
+        if (!receiverInput) {
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+            console.log("Đã gửi tin nhắn tổng");
+        } else {
+            chatMessage.receiver = receiverInput;
+            stompClient.send("/app/chat.privateMessage", {}, JSON.stringify(chatMessage));
+            console.log("Đã gửi tin nhắn riêng tới:", receiverInput);
+            // Hiển thị tin nhắn riêng cho người gửi
+            displayMessage(chatMessage, true);
+        }
 
-	 }
+        messageInput.value = '';
+    } else {
+        console.log("Không gửi được: Thiếu nội dung hoặc kết nối STOMP");
+    }
 
-	 event.preventDefault();
+    event.preventDefault();
+}
+
+function onPrivateMessageReceived(payload) {
+    var message = JSON.parse(payload.body);
+    console.log("Nhận tin nhắn riêng:", message);
+    displayMessage(message, true); // Hiển thị tin nhắn riêng
 }
 
 function onMessageReceived(payload) {
-	var message = JSON.parse(payload.body);
+    var message = JSON.parse(payload.body);
+    console.log("Nhận tin nhắn:", message);
+    displayMessage(message, false); // Hiển thị tin nhắn chung
+}
 
-	var messageElement = document.createElement('li');
+function displayMessage(message, isPrivate) {
+    var messageElement = document.createElement('li');
 
-	 if(message.type === 'JOIN') {
+    if (message.type === 'JOIN') {
         messageElement.classList.add('event-message');
-        message.content = message.sender + ' joined!';
+        messageElement.textContent = message.sender + ' đã tham gia!';
     } else if (message.type === 'LEAVE') {
         messageElement.classList.add('event-message');
-        message.content = message.sender + ' left!';
+        messageElement.textContent = message.sender + ' đã rời đi!';
     } else {
         messageElement.classList.add('chat-message');
+        if (isPrivate) {
+            messageElement.classList.add('private-message');
+        }
 
         var avatarElement = document.createElement('i');
         var avatarText = document.createTextNode(message.sender[0]);
         avatarElement.appendChild(avatarText);
-        avatarElement.style['background-color'] = getAvatarColor(message.sender);
-
+        avatarElement.style.backgroundColor = getAvatarColor(message.sender);
         messageElement.appendChild(avatarElement);
 
         var usernameElement = document.createElement('span');
-        var usernameText = document.createTextNode(message.sender);
-        usernameElement.appendChild(usernameText);
+        var messageHeader = message.sender;
+        if (isPrivate) {
+            messageHeader += " → " + (message.receiver === username ? "Bạn" : message.receiver) + " (Tin nhắn riêng)";
+        }
+        usernameElement.textContent = messageHeader;
         messageElement.appendChild(usernameElement);
+
+        var textElement = document.createElement('p');
+        textElement.textContent = message.content;
+        messageElement.appendChild(textElement);
     }
 
-    var textElement = document.createElement('p');
-    var messageText = document.createTextNode(message.content);
-    textElement.appendChild(messageText);
-
-    messageElement.appendChild(textElement);
-
     messageArea.appendChild(messageElement);
-    messageArea.scrollTop = messageArea.scrollHeight
-
+    messageArea.scrollTop = messageArea.scrollHeight;
 }
 
 function getAvatarColor(messageSender) {
@@ -111,5 +134,5 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
-usernameForm.addEventListener('submit', connect, true)
-messageForm.addEventListener('submit', sendMessage, true)
+usernameForm.addEventListener('submit', connect, true);
+messageForm.addEventListener('submit', sendMessage, true);

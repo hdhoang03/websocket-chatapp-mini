@@ -34,6 +34,9 @@
         </ul>
         <form id="messageForm" name="messageForm">
             <div class="form-group">
+                <!-- Ô nhập người nhận -->
+                <input type="text" id="receiver" placeholder="Receiver (leave empty for public chat)" class="form-control"/>
+
                 <div class="input-group clearfix">
                     <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
                     <button type="submit" class="primary">Send</button>
@@ -48,3 +51,43 @@
 <script src="/js/main.js"></script>
 </body>
 </html>
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Chat Room</title>-->
+<!--    <link rel="stylesheet" href="/css/style.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id="username-container">-->
+<!--    <h2>Enter your name:</h2>-->
+<!--    <input type="text" id="username" placeholder="Your name...">-->
+<!--    <button id="enter-chat">Enter Chat</button>-->
+<!--</div>-->
+
+<!--<div class="chat-container" style="display: none;">-->
+<!--    <div class="users-list">-->
+<!--        <h3>Online Users</h3>-->
+<!--        <ul id="users"></ul>-->
+<!--    </div>-->
+<!--    <div class="chat-box">-->
+<!--        <div id="chat-messages"></div>-->
+<!--        <div class="chat-input">-->
+<!--            <input type="text" id="message" placeholder="Type a message...">-->
+<!--            <button id="send">Send</button>-->
+<!--        </div>-->
+<!--        <div id="private-messages"></div>-->
+<!--        <div class="private-chat-input">-->
+<!--            <input type="text" id="receiver" placeholder="Receiver username">-->
+<!--            <input type="text" id="private-message" placeholder="Type a private message...">-->
+<!--            <button id="send-private">Send Private</button>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--</div>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>-->
+<!--<script defer src="/js/script.js"></script>-->
+<!--</body>-->
+<!--</html>-->
